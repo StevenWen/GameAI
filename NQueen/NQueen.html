@@ -1,0 +1,180 @@
+<body>
+	
+</body>
+
+
+
+<script type="text/javascript">
+
+
+
+function simple_forward_checking(board, current_row, solutions, num_solutions) {
+	n = board.length;
+	count = 0;
+	for (var i = 0; i < n; i++) {
+		if (count == num_solutions) {
+			return count;
+		}
+		if (board[current_row][i] == 0) {
+			board_copy = clone(board);
+			place_queen(board_copy, current_row, i);
+			if (current_row == n - 1) {				
+				solutions[solutions.length] = board_copy;
+				count ++;
+			} else {
+				count += simple_forward_checking(board_copy, current_row + 1, solutions, num_solutions);
+			}
+		}
+	}
+	return count;
+}
+
+function RC_MRVH(board, num_queens, solutions, num_solutions) {
+	current_row = minimum_remaining_row(board);
+	//if (current_row == -1) {
+		//return 0;
+	//}
+	n = board.length;
+	count = 0;
+	for (var i = 0; i < n; i++) {
+		if (count == num_solutions) {
+			return count;
+		}
+		if (board[current_row][i] == 0) {
+			board_copy = clone(board);
+			place_queen(board_copy, current_row, i);
+			if (num_queens == n - 1) {				
+				solutions[solutions.length] = board_copy;
+				count ++;
+			} else {
+				count += RC_MRVH(board_copy, num_queens + 1, solutions, num_solutions);
+			}
+		}
+	}
+	return count;
+}
+
+function minimum_remaining_row(board) {
+    n = board.length;
+	min_value = n;
+	min_row = 0;
+	for (i = 0; i < n; i++) {
+		value = 0;
+		has_queen = false;
+		for (j = 0; j < n; j++) {
+			if (board[i][j] == 0) {
+				value++;
+			}
+			if (board[i][j] == 1) {
+				has_queen = true;
+                break;
+			}
+		}
+        if (has_queen) {
+            continue;
+        }
+		if (value < min_value) {
+			min_value = value;
+			min_row = i;
+		}
+	}
+	return min_row;
+}
+
+function solve(board, num_solutions) {
+	solutions = [];
+	RC_MRVH(board, 0, solutions, num_solutions);
+	return solutions;
+}
+
+function solve_simple(board, num_solutions) {
+	solutions = [];
+	simple_forward_checking(board, 0, solutions, num_solutions);
+	return solutions;
+
+}
+
+function place_queen(board, row, column) {
+	n = board.length;
+	for (var i = 0; i < n; i++) {
+		board[i][column] = -1;
+	}
+	for (var i = 0; i < n; i++) {
+		board[row][i] = -1;
+	}
+	diagonal_row = row - Math.min(row, column);
+	diagonal_column = column - Math.min(row, column);
+	for (var i = 0; i < n - Math.max(diagonal_row, diagonal_column); i++) {
+		board[diagonal_row + i][diagonal_column + i] = -1;
+	}
+	reverse_column = n - 1 - column;
+	diagonal_row = row - Math.min(row, reverse_column);
+	diagonal_column = column + Math.min(row, reverse_column);
+	for (var i = 0; i < n - Math.max(diagonal_row, n - diagonal_column); i++) {
+		board[diagonal_row + i][diagonal_column - i] = -1;
+	}
+	board[row][column] = 1;
+}
+
+function create_board(n){
+	board = [];
+	for (i = 0; i < n; i++) {
+		row = [];
+		for (j = 0; j < n; j++) {
+			row[j] = 0;
+		}
+		board[i] = row;
+	}
+	return board;
+}
+
+function clone(board) {
+	n = board.length;
+	copy = [];
+	for (i = 0; i < n; i++) {
+		row = [];
+		for (j = 0; j < n; j++) {
+			row[j] = board[i][j];
+		}
+		copy[i] = row;
+	}
+	return copy;
+}
+
+function copy_board(target_board, source_board) {
+	n = target_board.length;
+	for (i = 0; i < n; i++) {
+		for (j = 0; j < n; j++) {
+			target_board[i][j] = source_board[i][j];
+		}
+	}
+}
+
+
+function display(board){
+    var body = document.body,
+    tbl  = document.createElement('table');
+    tbl.style.width='800px';
+    tbl.style.height='800px';
+    tbl.style.border = "1px solid black";
+    n = board.length;
+    for(var i = 0; i < n; i++){
+        var tr = tbl.insertRow();
+        for(var j = 0; j < n; j++){
+        	var td = tr.insertCell();
+            td.style.border = "1px solid black";
+            if (board[i][j] == 1) {
+            	td.appendChild(document.createTextNode('Q'))
+            }
+        }
+    }
+    body.appendChild(tbl);
+}
+board = create_board(13);
+
+//a = clone(board);
+//copy(a, board);
+a = solve_simple(board);
+display(a[0]);
+</script>
+
